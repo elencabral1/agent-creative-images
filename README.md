@@ -1,3 +1,71 @@
+# Creative Image Agent
+
+O **CreativeImageAgent** é um agente de IA desenvolvido para **gerar criativos visuais publicitários** com base em prompts e briefings fornecidos pelo usuário. Ele é ideal para designers, profissionais de marketing e equipes criativas que desejam automatizar a produção de imagens para campanhas, redes sociais, anúncios e muito mais.
+
+Este projeto utiliza o template **agents-starter**, a ferramenta `AIChatAgent` e o ecossistema da Cloudflare com suporte a **HTTP**.
+
+---
+
+## Objetivo do Projeto
+
+Este projeto foi criado com os seguintes objetivos:
+
+- Explorar o uso de **tools customizadas** com o Agents SDK da Cloudflare.
+- Criar uma ferramenta capaz de **gerar imagens realistas e temáticas** usando o modelo `gpt-image-1` (DALL·E 3) da OpenAI.
+- Lidar com permissões de API e fallback para modelos alternativos (ex: `dall-e-3`).
+- Permitir que usuários gerem criativos visuais de forma interativa, via **chat com streaming** ou chamadas HTTP.
+
+---
+
+## Funcionalidades
+
+- Recebe um **prompt criativo** como entrada (ex: tema, estilo visual, público-alvo).
+- Gera uma **imagem publicitária realista e visualmente atraente**, retornando a URL da imagem gerada.
+- Mensagem de erro amigável caso o modelo não esteja disponível.
+- Suporte a fallback automático para `dall-e-3`, caso `gpt-image-1` não esteja habilitado.
+- Logs de erro detalhados para facilitar depuração.
+
+---
+
+## Como funciona
+
+### Rodar o projeto no arquivo `package.json`. Clicar em 'start' dentro de 'scripts'. Será mostrado um link; abrindo esse link, um chat será exibido onde o usuário poderá interagir com o agente.
+
+Exemplo de entrada:
+```text
+Quero um criativo para uma campanha de outono com folhas caindo e uma xícara de café, estilo minimalista.
+```
+
+Resposta esperada:
+```text
+Imagem gerada: [link da imagem]
+Descrição: Um criativo visual com cenário de outono, folhas em tons terrosos, uma xícara de café fumegante em primeiro plano, com fundo minimalista e paleta aconchegante.
+```
+
+---
+
+## Configuração
+
+O projeto exige uma variável de ambiente com a chave da OpenAI:
+
+```text
+OPENAI_API_KEY=your_openai_key_here
+```
+
+> ⚠Para usar o modelo `gpt-image-1`, sua organização precisa estar verificada:  
+> [Verificar Organização](https://platform.openai.com/settings/organization/general)
+
+---
+
+## Tecnologias Utilizadas
+
+- Cloudflare Workers
+- Hono
+- Agents SDK
+- AIChatAgent
+- OpenAI API (gpt-image-1, DALL·E 3)
+- TypeScript
+
 # 🤖 Chat Agent Starter Kit
 
 ![agents-header](https://github.com/user-attachments/assets/f6d99eeb-1803-4495-9c5e-3cf07a37b402)
