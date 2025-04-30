@@ -15,7 +15,7 @@ import { tools, executions } from "./tools";
 import { AsyncLocalStorage } from "node:async_hooks";
 // import { env } from "cloudflare:workers";
 
-const model = openai("gpt-4o-2024-11-20");
+const model = openai("gpt-4-turbo");
 // Cloudflare AI Gateway
 // const openai = createOpenAI({
 //   apiKey: env.OPENAI_API_KEY,
@@ -56,6 +56,7 @@ export class AgentCreativeImages extends AIChatAgent<Env> {
 ${unstable_getSchedulePrompt({ date: new Date() })}
 
 If the user asks to schedule a task, use the schedule tool to schedule the task.
+If the user asks to the generate creative image, use the generate creative tool.
 `,
             messages: processedMessages,
             tools,
@@ -63,7 +64,8 @@ If the user asks to schedule a task, use the schedule tool to schedule the task.
             onError: (error) => {
               console.error("Error while streaming:", error);
             },
-            maxSteps: 10,
+            maxTokens: 500,
+            maxSteps: 4,
           });
 
           // Merge the AI response stream with tool execution outputs

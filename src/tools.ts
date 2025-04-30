@@ -2,7 +2,7 @@
  * Tool definitions for the AI chat agent
  * Tools can either require human confirmation or execute automatically
  */
-import { tool } from "ai";
+import { streamText, tool } from "ai";
 import { z } from "zod";
 
 import { agentContext } from "./server";
@@ -10,6 +10,8 @@ import {
   unstable_getSchedulePrompt,
   unstable_scheduleSchema,
 } from "agents/schedule";
+import { openai } from "@ai-sdk/openai";
+import OpenAI from "openai";
 
 /**
  * Weather information tool that requires human confirmation
@@ -21,6 +23,11 @@ const getWeatherInformation = tool({
   parameters: z.object({ city: z.string() }),
   // Omitting execute function makes this tool require human confirmation
 });
+
+const getCreativeImages = tool({
+  description: "generate visual creatives for advertising campaigns",
+  parameters: z.object({ prompt: z.string() }),
+})
 
 /**
  * Local time tool that executes automatically
@@ -124,12 +131,16 @@ const cancelScheduledTask = tool({
  */
 export const tools = {
   getWeatherInformation,
+  getCreativeImages,
   getLocalTime,
   scheduleTask,
   getScheduledTasks,
   cancelScheduledTask,
 };
 
+const openai2 = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 /**
  * Implementation of confirmation-required tools
  * This object contains the actual logic for tools that need human approval
@@ -140,4 +151,48 @@ export const executions = {
     console.log(`Getting weather information for ${city}`);
     return `The weather in ${city} is sunny`;
   },
+  getCreativeImages: async ({ prompt }: { prompt: string }) => {
+    try {
+      console.log(`Gerando conceito visual para: ${prompt}`);
+
+      const result = streamText({
+        model: openai("gpt-4-turbo"),
+        system: `Você é um especialista em marketing criativo. 
+        Gere descrições concisas (máximo 100 palavras) para criativos publicitários.
+        Formato: "Criativo visual: [descrição concisa]"`,
+        prompt: `Descreva em 100 palavras ou menos um criativo visual para: ${prompt}`,
+        maxTokens: 300,
+      });
+
+      await result.consumeStream();
+      const concept = await result.text;
+      console.log("Descrição visual gerada:", concept);
+
+      const imageResponse = await openai2.images.generate({
+        model: "dall-e-3",
+        prompt: concept,
+        n: 1,
+        size: "1024x1024",
+      });
+
+      const imageData = imageResponse.data;
+      if (!imageData || imageData.length === 0 || !imageData[0].url) {
+        throw new Error("Imagem não pôde ser gerada");
+      }
+
+      const imageUrl = imageData[0].url;
+
+      return {
+        imagePrompt: concept,
+        imageUrl,
+      };
+
+    } catch (error) {
+      console.error("Erro ao gerar criativo:", error);
+      return {
+        error: "Não foi possível gerar o criativo visual no momento. Tente novamente mais tarde.",
+        details: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
 };
